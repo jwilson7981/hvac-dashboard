@@ -1,15 +1,26 @@
 import streamlit as st
-import os
+import pandas as pd
 
-st.set_page_config(page_title="HVAC Debug", layout="wide")
-st.title("📂 Streamlit File Debugger")
+st.set_page_config(page_title="HVAC Dashboard", layout="wide")
 
-st.subheader("🗂️ Files visible to Streamlit:")
-files = os.listdir(".")
-for f in files:
-    st.write(f)
+st.title("Air Tech Mechanical - Project Dashboard")
+st.markdown("Below are your currently active projects from `Projects.xlsx`.")
 
-if "Projects.xlsx" in files:
-    st.success("✅ Projects.xlsx was found.")
-else:
-    st.error("❌ Projects.xlsx NOT FOUND. Check file name and repo location.")
+# ✅ Load Excel file
+@st.cache_data
+def load_data():
+    try:
+        df = pd.read_excel("Projects.xlsx", sheet_name="Active Projects", engine="openpyxl")
+        return df
+    except FileNotFoundError:
+        st.error("❌ Projects.xlsx not found.")
+        return None
+    except ValueError:
+        st.error("❌ Sheet 'Active Projects' not found in Projects.xlsx.")
+        return None
+
+df = load_data()
+
+# ✅ Show table
+if df is not None:
+    st.dataframe(df, use_container_width=True)
